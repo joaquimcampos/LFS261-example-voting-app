@@ -6,6 +6,9 @@ Worker Java App
 - Build status:
 [![Build Status](http://34.175.195.52:8080/buildStatus/icon?job=instavote%2Fworker-build)](http://localhost:8080/job/instavote/job/worker-build/)
 
+- Test status:
+[![Build Status](http://34.175.195.52:8080/buildStatus/icon?job=instavote%2Fworker-package&subject=UnitTest)](http://localhost:8080/job/instavote/job/worker-package/)
+
 Getting started
 ---------------
 
