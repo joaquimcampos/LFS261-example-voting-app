@@ -3,7 +3,8 @@ Example Voting App
 
 Worker Java App
 ----------
-- Build Status: [![Build Status](http://34.175.195.52:8080/buildStatus/icon?job=instavote%2Fworker-build)](http://34.175.195.52:8080/job/instavote/job/worker-build/)
+- Build status:
+[![Build Status](http://34.175.195.52:8080/buildStatus/icon?job=instavote%2Fworker-build)](http://localhost:8080/job/instavote/job/worker-build/)
 
 Getting started
 ---------------
