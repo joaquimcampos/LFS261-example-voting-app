@@ -1,0 +1,43 @@
+pipeline { 
+    agent any
+    
+    tools {
+        nodejs 'nodejs 22.4.0'
+    }
+ 
+    stages{ 
+        stage('build'){
+            when {
+                changeset "**/result/**"
+	    }
+            steps{ 
+                echo 'Compiling result app' 
+                dir('result'){ 
+                    npm install
+                } 
+            } 
+        } 
+        stage('test'){ 
+            when {
+                changeset "**/result/**"
+	    }
+            steps{ 
+                echo 'running unit tests on result app' 
+                dir('result'){ 
+                    npm install
+                    npm test
+                } 
+            } 
+        } 
+    post{ 
+        always{ 
+            echo 'Building multibranch pipeline for result (node.js) is completed..' 
+        }
+        failure{
+            slackSend (channel: "#ci-cd", message: "Node.js Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER}")
+        }
+        success{
+            slackSend (channel: "#ci-cd", message: "Node.js Build Success: ${env.JOB_NAME} ${env.BUILD_NUMBER}")
+        }
+    }
+}
