@@ -10,6 +10,7 @@ Worker Java App
 [![Build Status](http://34.175.195.52:8080/buildStatus/icon?job=instavote%2Fworker-package&subject=UnitTest)](http://localhost:8080/job/instavote/job/worker-package/)
 
 A little change
+Another little change
 
 Getting started
 ---------------
