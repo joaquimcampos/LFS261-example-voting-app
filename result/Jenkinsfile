@@ -28,7 +28,8 @@ pipeline {
                     npm test
                 } 
             } 
-        } 
+        }
+    } 
     post{ 
         always{ 
             echo 'Building multibranch pipeline for result (node.js) is completed..' 
