@@ -73,7 +73,7 @@ pipeline {
               try {
                 docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
                     def workerImage = docker.build(
-                    "jcampos15/worker:v${env.BUILD_ID}", "./worker"
+                      "jcampos15/worker:v${env.BUILD_ID}", "--no-cache ./worker"
                     )
                     workerImage.push()
                     workerImage.push("${env.BRANCH_NAME}")
