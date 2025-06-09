@@ -2,10 +2,6 @@ pipeline {
 
   agent none
 
-  tools {
-      nodejs 'nodejs-22.4.0'
-  }
-
   stages{
 
     // Worker app
@@ -161,6 +157,11 @@ pipeline {
 
     // Result app
     stage('result-build'){
+      agent {
+        docker {
+          image 'node:22.4.0-alpine'
+        }
+      }
       when {
         changeset "**/result/**"
       }
@@ -173,6 +174,11 @@ pipeline {
     }
 
     stage('result-test'){ 
+      agent {
+        docker {
+          image 'node:22.4.0-alpine'
+        }
+      }
       when {
         changeset "**/result/**"
       }
@@ -183,6 +189,25 @@ pipeline {
           sh 'npm test'
         } 
       } 
+    }
+
+    stage('result-docker-package') {
+      agent any
+      when {
+        changeset '**/result/**'
+        branch 'master'
+      }
+      steps {
+        echo 'Packaging result app with docker'
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
+            def resultImage = docker.build("jcampos15/result:v${env.BUILD_ID}", './result')
+            resultImage.push()
+            resultImage.push("${env.BRANCH_NAME}")
+            resultImage.push('latest')
+          }
+        }
+      }
     }
 
     // Deploy all to dev
