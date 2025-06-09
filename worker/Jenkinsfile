@@ -3,25 +3,40 @@ pipeline {
   agent none
 
   stages{
-      stage("build"){
-        when{
-            changeset "**/worker/**"
-          }
-
-        agent{
-          docker{
-            image 'maven:3.9.8-sapmachine-21'
-            args '-v $HOME/.m2:/root/.m2'
-          }
+      stage('build') {
+        agent {
+            label 'docker' // Use an agent with Docker installed
         }
-
-        steps{
-          echo 'Compiling worker app..'
-          dir('worker'){
-            sh 'mvn compile'
+        steps {
+          script {
+              // Pre-pull the image to avoid delays
+              sh 'docker pull maven:3.9.8-sapmachine-21 || true'
+              
+              docker.image('maven:3.9.8-sapmachine-21').inside('-u root -v /tmp:/tmp') {
+                  dir('worker') {
+                      sh 'mvn -B clean compile'
+                  }
+              }
           }
         }
       }
+      // when{
+      //     changeset "**/worker/**"
+      //   }
+
+      // agent{
+      //   docker{
+      //     image 'maven:3.9.8-sapmachine-21'
+      //     args '-v $HOME/.m2:/root/.m2'
+      //   }
+      // }
+
+      // steps{
+      //   echo 'Compiling worker app..'
+      //   dir('worker'){
+      //     sh 'mvn compile'
+      //   }
+      // }
       stage("test"){
         when{
           changeset "**/worker/**"
