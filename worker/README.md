@@ -7,6 +7,3 @@ Some changes
 Another one
 Another
 Another
-Change
-Change
-Change
