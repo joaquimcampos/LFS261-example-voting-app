@@ -1,44 +1,46 @@
-pipeline { 
-    agent any
+pipeline {
+  agent any
     
-    tools {
-        nodejs 'nodejs-22.4.0'
-    }
- 
-    stages{ 
-        stage('build'){
-            when {
-                changeset "**/result/**"
-	    }
-            steps{ 
-                echo 'Compiling result app' 
-                dir('result'){ 
-                    sh 'npm install'
-                } 
-            } 
+  tools {
+      nodejs 'nodejs-22.4.0'
+  }
+  
+  stages{ 
+    // Result app
+    stage('result-build'){
+      when {
+        changeset "**/result/**"
+      }
+      steps{ 
+        echo 'Compiling result app' 
+        dir(path: 'result'){ 
+          sh 'npm install'
         } 
-        stage('test'){ 
-            when {
-                changeset "**/result/**"
-	    }
-            steps{ 
-                echo 'running unit tests on result app' 
-                dir('result'){ 
-                    sh 'npm install'
-                    sh 'npm test'
-                } 
-            } 
-        }
-    } 
-    post{ 
-        always{ 
-            echo 'Building multibranch pipeline for result (node.js) is completed..' 
-        }
-        failure{
-            slackSend (channel: "#ci-cd", message: "Node.js Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
-        }
-        success{
-            slackSend (channel: "#ci-cd", message: "Node.js Build Success: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
-        }
+      } 
     }
+
+    stage('result-test'){ 
+      when {
+        changeset "**/result/**"
+      }
+      steps{ 
+        echo 'running unit tests on result app' 
+        dir(path: 'result'){ 
+          sh 'npm install'
+          sh 'npm test'
+        } 
+      } 
+    }
+  } 
+  post{ 
+    always{ 
+      echo 'Building multibranch pipeline for result (node.js) is completed..' 
+    }
+    failure{
+      slackSend (channel: "#ci-cd", message: "Node.js Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
+    }
+    success{
+      slackSend (channel: "#ci-cd", message: "Node.js Build Success: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
+    }
+  }
 }

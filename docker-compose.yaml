@@ -6,17 +6,18 @@ networks:
     driver: bridge
 
 services:
-  redis:
-    image: redis:alpine
-    networks:
-      - instavote
-  
   vote:
     image: jcampos15/vote:latest
+    build: ./vote
     ports:
       - 5000:80
     depends_on:
       - redis
+    networks:
+      - instavote
+  
+  redis:
+    image: redis:alpine
     networks:
       - instavote
   
@@ -36,6 +37,7 @@ services:
   
   result:
     image: jcampos15/result:latest
+    build: ./result
     ports:
       - 5001:80
     depends_on:
@@ -45,6 +47,7 @@ services:
 
   worker:
     image: jcampos15/worker:latest
+    build: ./worker
     depends_on:
       - redis
       - db
