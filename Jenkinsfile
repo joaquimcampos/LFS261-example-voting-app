@@ -8,14 +8,12 @@ pipeline {
       when{
           changeset "**/worker/**"
         }
-
       agent{
         docker{
           image 'maven:3.9.8-sapmachine-21'
           args '-v $HOME/.m2:/root/.m2'
         }
       }
-
       steps{
         echo 'Compiling worker app..'
         dir('worker'){
@@ -30,7 +28,6 @@ pipeline {
           image 'maven:3.9.8-sapmachine-21'
           args '-v $HOME/.m2:/root/.m2'
         }
-
       }
       when {
         changeset '**/worker/**'
@@ -40,7 +37,6 @@ pipeline {
         dir('worker') {
           sh 'mvn clean test'
         }
-
       }
     }
 
@@ -50,7 +46,6 @@ pipeline {
           image 'maven:3.9.8-sapmachine-21'
           args '-v $HOME/.m2:/root/.m2'
         }
-
       }
       when {
         branch 'master'
@@ -82,7 +77,6 @@ pipeline {
             workerImage.push('latest')
           }
         }
-
       }
     }
 
@@ -91,7 +85,6 @@ pipeline {
         docker {
           image 'node:22.4.0-alpine'
         }
-
       }
       when {
         changeset '**/result/**'
@@ -101,7 +94,6 @@ pipeline {
         dir('result') {
           sh 'npm install'
         }
-
       }
     }
 
@@ -110,7 +102,6 @@ pipeline {
         docker {
           image 'node:22.4.0-alpine'
         }
-
       }
       when {
         changeset '**/result/**'
@@ -121,7 +112,6 @@ pipeline {
           sh 'npm install'
           sh 'npm test'
         }
-
       }
     }
 
@@ -150,7 +140,6 @@ pipeline {
           image 'python:2.7.16-slim'
           args '--user root'
         }
-
       }
       when {
         changeset '**/vote/**'
@@ -160,7 +149,6 @@ pipeline {
         dir('vote') {
           sh 'pip install -r requirements.txt'
         }
-
       }
     }
 
@@ -170,7 +158,6 @@ pipeline {
           image 'python:2.7.16-slim'
           args '--user root'
         }
-
       }
       when {
         changeset '**/vote/**'
@@ -181,24 +168,22 @@ pipeline {
           sh 'pip install -r requirements.txt'
           sh 'nosetests -v'
         }
-
       }
     }
 
     stage('vote-integration'){ 
-    agent any 
-    when{ 
-      changeset "**/vote/**" 
-      branch 'master' 
-    } 
-    steps{ 
-      echo 'Running Integration Tests on vote app' 
-      dir('vote'){ 
-        sh 'sh integration_test.sh' 
-      } 
-    } 
-} 
-
+      agent any 
+      when{ 
+        changeset "**/vote/**" 
+        branch 'master' 
+      }
+      steps{ 
+        echo 'Running Integration Tests on vote app' 
+        dir('vote'){ 
+          sh 'sh integration_test.sh' 
+        }
+      }
+    }
 
     stage('vote-docker-package') {
       agent any
@@ -213,10 +198,37 @@ pipeline {
             voteImage.push("latest")
           }
         }
-
       }
     }
 
+    stage('Sonarqube') {
+      agent any
+      when{
+        branch 'master'
+      }
+      // tools {
+      // jdk "JDK11" // the name you have given the JDK installation in Global Tool Configuration
+      // }
+      environment{
+        sonarpath = tool 'SonarScanner'
+      }
+      steps {
+        echo 'Running Sonarqube Analysis..'
+        withSonarQubeEnv('sonar-instavote') {
+          sh "${sonarpath}/bin/sonar-scanner -Dproject.settings=sonar-project.properties -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=86400"
+        }
+      }
+    }
+
+    stage("Quality Gate") {
+      steps {
+        timeout(time: 1, unit: 'HOURS') {
+          // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+          // true = set pipeline to UNSTABLE, false = don't
+          waitForQualityGate abortPipeline: true
+        }
+      }
+    }
 
     stage('deploy to dev') {
       agent any
