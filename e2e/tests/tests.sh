@@ -41,6 +41,8 @@ echo "Vote count after first submission: $current"
 new=$(get_vote_count)
 # done
 
+echo "new vote count: $new"
+
 # Final check
 echo "Performing final check..."
 if [ $initial_count -lt $new ]; then
